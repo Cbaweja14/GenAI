@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShikshaBot - Rural Education Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2E8B57, #32CD32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .role-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .role-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-btn:hover {
+            border-color: #2E8B57;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .role-btn .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .role-btn .hindi {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2E8B57;
+        }
+
+        .role-btn .english {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .question-input {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: #2E8B57;
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: #2E8B57;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn:hover {
+            background: #256147;
+            transform: translateY(-1px);
+        }
+
+        .btn.voice-btn {
+            background: #ff6b6b;
+        }
+
+        .btn.voice-btn:hover {
+            background: #ff5252;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .previous-questions {
+            margin-top: 20px;
+        }
+
+        .previous-questions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .prev-question {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .prev-question:hover {
+            background: #e8f5e8;
+        }
+
+        .response-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #2E8B57;
+        }
+
+        .bot-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .response-text {
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .hindi-text {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .english-text {
+            color: #666;
+            font-style: italic;
+        }
+
+        .response-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #2E8B57;
+            color: white;
+            border-color: #2E8B57;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .sync-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #ffc107;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #2E8B57;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .analytics-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .analytics-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2E8B57;
+            display: block;
+        }
+
+        .analytics-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .chart-placeholder {
+            background: #f8f9fa;
+            height: 120px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin: 15px 0;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .flex-row select {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="connection-status" id="connectionStatus">
+                🔴 Offline
+            </div>
+            <h1>🎓 ShikshaBot</h1>
+            <div class="subtitle">Rural Education Companion</div>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="screen active" id="homeScreen">
+            <div class="content">
+                <div class="role-buttons">
+                    <div class="role-btn" onclick="showScreen('studentScreen')">
+                        <div class="icon">👨‍🎓</div>
+                        <div class="hindi">छात्र</div>
+                        <div class="english">STUDENT</div>
+                    </div>
+                    <div class="role-btn" onclick="showScreen('teacherScreen')">
+                        <div class="icon">👩‍🏫</div>
+                        <div class="hindi">शिक्षक</div>
+                        <div class="english">TEACHER</div>
+                    </div>
+                    <div class="role-btn" onclick="showScreen('adminScreen')">
+                        <div class="icon">🏫</div>
+                        <div class="hindi">स्कूल प्रशासक</div>
+                        <div class="english">SCHOOL ADMIN</div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-bar">
+                <span class="sync-indicator"></span>
+                Last Sync: 2 दिन पहले / 2 days ago
+            </div>
+        </div>
+
+        <!-- Student Screen -->
+        <div class="screen" id="studentScreen">
+            <div class="content">
+                <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 10px;">
+                        कक्षा/Class: 8th | विषय/Subject: विज्ञान/Science
+                    </div>
+                </div>
+
+                <textarea 
+                    class="question-input" 
+                    id="questionInput"
+                    placeholder="आपका प्रश्न यहाँ टाइप करें...&#10;Type your question here..."
+                ></textarea>
+
+                <div class="input-buttons">
+                    <button class="btn voice-btn" onclick="startVoiceInput()">
+                        🎤 बोलकर पूछें
+                    </button>
+                    <button class="btn" onclick="askQuestion()">
+                        📤 प्रश्न भेजें
+                    </button>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <div>AI सोच रहा है... / AI is thinking...</div>
+                </div>
+
+                <div class="previous-questions">
+                    <h3>Previous Questions:</h3>
+                    <div class="prev-question" onclick="askPredefinedQuestion('प्रकाश संश्लेषण क्या है?')">
+                        • प्रकाश संश्लेषण क्या है? / What is photosynthesis?
+                    </div>
+                    <div class="prev-question" onclick="askPredefinedQuestion('गुरुत्वाकर्षण बल क्या है?')">
+                        • गुरुत्वाकर्षण बल क्या है? / What is gravitational force?
+                    </div>
+                    <div class="prev-question" onclick="askPredefinedQuestion('जड़त्व क्या है?')">
+                        • जड़त्व क्या है? / What is inertia?
+                    </div>
+                </div>
+            </div>
+            <div class="status-bar">
+                📶 Offline Mode | 🔄 Sync Pending
+            </div>
+        </div>
+
+        <!-- Response Screen -->
+        <div class="screen" id="responseScreen">
+            <div class="content">
+                <button class="back-btn" onclick="showScreen('studentScreen')">← Back to Questions</button>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>प्रश्न/Question:</strong> <span id="currentQuestion"></span>
+                </div>
+
+                <div class="response-container">
+                    <div class="bot-icon">🤖 ShikshaBot का उत्तर:</div>
+                    <div class="response-text">
+                        <div class="hindi-text" id="hindiResponse"></div>
+                        <div class="english-text" id="englishResponse"></div>
+                    </div>
+                    <div class="response-actions">
+                        <button class="action-btn" onclick="playAudio()">🔊 सुनें</button>
+                        <button class="action-btn" onclick="copyResponse()">📋 Copy</button>
+                        <button class="action-btn" onclick="askMore()">❓ और पूछें</button>
+                    </div>
+                </div>
+            </div>
+            <div class="status-bar">
+                ✅ Response Generated Offline
+            </div>
+        </div>
+
+        <!-- Teacher Screen -->
+        <div class="screen" id="teacherScreen">
+            <div class="content">
+                <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2>नमस्ते Teachers! 🙏</h2>
+                    <p style="color: #666;">Hello Teachers!</p>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>📚 Generate Quiz</h3>
+                    <div style="margin: 15px 0;">
+                        <select>
+                            <option>Select Chapter</option>
+                            <option>Ch-7: Light</option>
+                            <option>Ch-8: Force & Pressure</option>
+                            <option>Ch-9: Friction</option>
+                        </select>
+                        <div class="flex-row">
+                            <select>
+                                <option>8th Class</option>
+                                <option>7th Class</option>
+                                <option>9th Class</option>
+                            </select>
+                            <select>
+                                <option>5 Questions</option>
+                                <option>10 Questions</option>
+                                <option>15 Questions</option>
+                            </select>
+                        </div>
+                        <button class="btn" style="width: 100%;" onclick="generateQuiz()">🎯 Generate Quiz</button>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>📝 Remedial Hints</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Upload student answers for personalized hints</p>
+                    <button class="btn" style="width: 100%;" onclick="uploadFile()">📁 Upload File</button>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 10px;">Recent Activities:</h3>
+                    <div class="prev-question">• Quiz generated for Ch-7 Light</div>
+                    <div class="prev-question">• Remedial hints for 15 students</div>
+                </div>
+            </div>
+            <div class="status-bar">
+                📊 25 students helped today
+            </div>
+        </div>
+
+        <!-- Admin Screen -->
+        <div class="screen" id="adminScreen">
+            <div class="content">
+                <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+                
+                <h2 style="text-align: center; margin-bottom: 20px;">📊 School Dashboard</h2>
+
+                <div class="analytics-card">
+                    <span class="analytics-number">245</span>
+                    <span class="analytics-label">Total Students</span>
+                </div>
+
+                <div class="analytics-card">
+                    <span class="analytics-number">187</span>
+                    <span class="analytics-label">Active Users (76%)</span>
+                </div>
+
+                <div class="analytics-card">
+                    <span class="analytics-number">1,247</span>
+                    <span class="analytics-label">Questions Asked</span>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>Weekly Usage</h3>
+                    <div class="chart-placeholder">
+                        📊 Usage Chart (Offline Mode)
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>Subject-wise Engagement:</h3>
+                    <div style="margin-top: 10px;">
+                        <div>• गणित/Math: 35%</div>
+                        <div>• विज्ञान/Science: 28%</div>
+                        <div>• हिंदी/Hindi: 22%</div>
+                        <div>• अंग्रेजी/English: 15%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-bar">
+                📡 Last Sync: 1 hour ago | Teacher Feedback: ⭐⭐⭐⭐⭐ (4.7/5)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentScreen = 'homeScreen';
+        
+        // Sample responses database (simulating offline content)
+        const responses = {
+            'प्रकाश संश्लेषण क्या है?': {
+                hindi: 'प्रकाश संश्लेषण बिल्कुल वैसे ही है जैसे किसान अपने खेत में बीज बोकर सूर्य की रोशनी और पानी से फसल उगाता है। इसी तरह पेड़-पौधे अपनी पत्तियों में सूर्य की रोशनी और CO2 गैस लेकर अपना खाना (ग्लूकोज़) बनाते हैं। यह प्रक्रिया हरी पत्तियों में मौजूद क्लोरोफिल की मदद से होती है।',
+                english: 'Photosynthesis is like how a farmer grows crops using sunlight and water. Plants use sunlight and CO2 to make their own food (glucose) in their leaves with the help of chlorophyll.'
+            },
+            'गुरुत्वाकर्षण बल क्या है?': {
+                hindi: 'गुरुत्वाकर्षण बल वैसे ही है जैसे जब आप आम का पेड़ हिलाते हैं तो आम नीचे गिर जाते हैं। पृथ्वी सभी चीजों को अपनी ओर खींचती है। यही कारण है कि जब हम कोई चीज़ ऊपर फेंकते हैं तो वह वापस नीचे आ जाती है।',
+                english: 'Gravitational force is like when you shake a mango tree and mangoes fall down. Earth pulls everything towards itself. That\'s why when we throw something up, it comes back down.'
+            },
+            'जड़त्व क्या है?': {
+                hindi: 'जड़त्व का मतलब है कि कोई भी चीज़ अपनी अवस्था बदलना नहीं चाहती। जैसे जब बस अचानक रुकती है तो आप आगे की ओर झुक जाते हैं। या जब बैलगाड़ी खड़ी है तो उसे चलाने के लिए ज्यादा बल लगाना पड़ता है।',
+                english: 'Inertia means any object doesn\'t want to change its state. Like when a bus suddenly stops, you lean forward. Or when a bullock cart is stationary, it takes more force to start moving.'
+            }
+        };
+
+        // Screen navigation
+        function showScreen(screenId) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+            
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+            currentScreen = screenId;
+        }
+
+        // Voice input simulation
+        function startVoiceInput() {
+            alert('🎤 Voice input started!\n\nIn the real app, this would:\n- Use device microphone\n- Convert Hindi/English speech to text\n- Support regional languages\n\nFor now, try typing a question!');
+        }
+
+        // Ask question function
+        function askQuestion() {
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('कृपया एक प्रश्न टाइप करें / Please type a question');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
+            // Simulate AI processing delay
+            setTimeout(() => {
+                showResponse(question);
+            }, 2000);
+        }
+
+        // Ask predefined question
+        function askPredefinedQuestion(question) {
+            document.getElementById('questionInput').value = question;
+            askQuestion();
+        }
+
+        // Show AI response
+        function showResponse(question) {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('currentQuestion').textContent = question;
+            
+            // Get response from database or generate default
+            let response = responses[question];
+            if (!response) {
+                response = {
+                    hindi: 'यह एक बहुत अच्छा प्रश्न है। मैं इसका उत्तर खोजने की कोशिश कर रहा हूँ। कृपया कुछ समय बाद पूछें या इसे अलग तरीके से पूछें।',
+                    english: 'This is a great question. I\'m trying to find the answer. Please ask later or rephrase the question.'
+                };
+            }
+            
+            document.getElementById('hindiResponse').textContent = response.hindi;
+            document.getElementById('englishResponse').textContent = response.english;
+            
+            showScreen('responseScreen');
+        }
+
+        // Response action functions
+        function playAudio() {
+            alert('🔊 Audio playback started!\n\nIn the real app, this would:\n- Use text-to-speech engine\n- Support Hindi and regional languages\n- Work offline with downloaded voices');
+        }
+
+        function copyResponse() {
+            const hindiText = document.getElementById('hindiResponse').textContent;
+            const englishText = document.getElementById('englishResponse').textContent;
+            const fullResponse = hindiText + '\n\n' + englishText;
+            
+            // Try to copy to clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(fullResponse).then(() => {
+                    alert('📋 Response copied to clipboard!');
+                });
+            } else {
+                alert('📋 Response ready to copy:\n\n' + fullResponse);
+            }
+        }
+
+        function askMore() {
+            showScreen('studentScreen');
+            document.getElementById('questionInput').value = '';
+            document.getElementById('questionInput').focus();
+        }
+
+        // Teacher functions
+        function generateQuiz() {
+            alert('🎯 Quiz Generated!\n\nIn the real app, this would:\n- Generate NCERT-aligned questions\n- Create answer keys\n- Provide rural context examples\n- Work completely offline\n\nSample Quiz Generated for Ch-7 Light:\n1. प्रकाश कैसे फैलता है?\n2. दर्पण कैसे काम करता है?\n3. इंद्रधनुष कैसे बनता है?');
+        }
+
+        function uploadFile() {
+            alert('📁 File Upload!\n\nIn the real app, this would:\n- Accept student answer sheets\n- Analyze common mistakes\n- Generate personalized remedial hints\n- Work with image/text files\n\nFor now, this simulates the upload process.');
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate connection status changes
+            setTimeout(() => {
+                const status = document.getElementById('connectionStatus');
+                if (Math.random() > 0.7) {
+                    status.innerHTML = '🟢 Online';
+                    status.classList.remove('offline');
+                    status.classList.add('online');
+                }
+            }, 5000);
+
+            // Focus on question input when student screen loads
+            const questionInput = document.getElementById('questionInput');
+            if (questionInput) {
+                questionInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        askQuestion();
+                    }
+                });
+            }
+        });
+
+        // Add some interactivity to previous questions
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('prev-question')) {
+                e.target.style.background = '#c8e6c9';
+                setTimeout(() => {
+                    e.target.style.background = '#f1f3f4';
+                }, 200);
+            }
+        });
+    </script>
+</body>
+</html>
